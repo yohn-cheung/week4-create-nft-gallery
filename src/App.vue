@@ -89,8 +89,6 @@ async function fetchNFTs() {
       });
   }
 
-  console.log("nfts: ", nfts);
-
   if (nfts.totalCount !== 0) {
     NFTs.value = nfts.ownedNfts;
     show.value = false;
