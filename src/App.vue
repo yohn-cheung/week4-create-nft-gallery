@@ -12,6 +12,8 @@ const next = ref(false);
 const message = ref("");
 const show = ref(false);
 
+const api_key = import.meta.env.VITE_MY_API_KEY;
+
 function startSearching() {
   show.value = false;
   if (wallet.value === "" && collection.value === "") return;
@@ -28,7 +30,7 @@ async function fetchNFTsForCollection() {
     var requestOptions = {
       method: "GET",
     };
-    const api_key = "";
+    // const api_key = "";
     const baseURL = `https://eth-mainnet.alchemyapi.io/v2/${api_key}/getNFTsForCollection/`;
     const fetchURL = `${baseURL}?contractAddress=${
       collection.value
@@ -54,7 +56,7 @@ async function fetchNFTs() {
   NFTs.value = null;
   next.value = false;
   let nfts;
-  const api_key = "";
+  // const api_key = "";
   const baseURL = `https://eth-mainnet.alchemyapi.io/v2/${api_key}/getNFTs/`;
   var requestOptions = {
     method: "GET",
@@ -87,11 +89,12 @@ async function fetchNFTs() {
       });
   }
 
-  if (nfts.ownedNfts.length !== 0 || nfts) {
+  console.log("nfts: ", nfts);
+
+  if (nfts.totalCount !== 0) {
     NFTs.value = nfts.ownedNfts;
     show.value = false;
   } else {
-    console.log("no NFTS");
     show.value = true;
     message.value = "NO NFT FOUND, TRY A NEW ADDRESS";
   }
@@ -99,7 +102,6 @@ async function fetchNFTs() {
   if (nfts.hasOwnProperty("pageKey")) {
     if (!pageKeys.value.includes(nfts.pageKey)) {
       pageKeys.value.push(nfts.pageKey);
-      console.log("test: ", pageKeys);
     }
   } else {
     next.value = true;
