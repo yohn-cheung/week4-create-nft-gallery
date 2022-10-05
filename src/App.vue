@@ -8,8 +8,12 @@ const NFTs = ref(null);
 const pageKeys = ref([]);
 
 const currentPage = ref(0);
+const next = ref(false);
+const message = ref("");
+const show = ref(false);
 
 function startSearching() {
+  show.value = false;
   if (wallet.value === "" && collection.value === "") return;
   if (checked.value) {
     fetchNFTsForCollection();
@@ -29,20 +33,27 @@ async function fetchNFTsForCollection() {
     const fetchURL = `${baseURL}?contractAddress=${
       collection.value
     }&withMetadata=${"true"}`;
-    const nfts = await fetch(fetchURL, requestOptions).then((data) =>
-      data.json()
-    );
+    const nfts = await fetch(fetchURL, requestOptions)
+      .then((data) => data.json())
+      .catch((error) => {
+        show.value = true;
+        message.value = "ENTER A VALID ADDRESS";
+      });
+
     if (nfts) {
-      console.log("NFTs in collection:", nfts);
       NFTs.value = nfts.nfts;
+    } else {
+      console.log("no NFTS");
+      show.value = true;
+      message.value = "NO NFT FOUND, TRY A NEW ADDRESS";
     }
   }
 }
 
 async function fetchNFTs() {
   NFTs.value = null;
+  next.value = false;
   let nfts;
-  console.log("fetching nfts");
   const api_key = "";
   const baseURL = `https://eth-mainnet.alchemyapi.io/v2/${api_key}/getNFTs/`;
   var requestOptions = {
@@ -51,43 +62,47 @@ async function fetchNFTs() {
 
   if (!collection.value.length) {
     let fetchURL;
-
-    // console.log("pageKey: ", pageKey);
     if (pageKeys.value.length > 0) {
-      console.log("pageKey in the if: ", pageKeys);
-      console.log("curenttPage: ", currentPage.value);
       fetchURL = `${baseURL}?owner=${wallet.value}&pageSize=9&pageKey=${
         pageKeys.value[currentPage.value - 1]
       }`;
     } else {
-      console.log("in the else");
       fetchURL = `${baseURL}?owner=${wallet.value}&pageSize=9`;
     }
 
-    nfts = await fetch(fetchURL, requestOptions).then((data) => data.json());
+    nfts = await fetch(fetchURL, requestOptions)
+      .then((data) => data.json())
+      .catch(() => {
+        show.value = true;
+        message.value = "ENTER A VALID ADDRESS";
+      });
   } else {
     console.log("fetching nfts for collection owned by address");
     const fetchURL = `${baseURL}?owner=${wallet.value}&contractAddresses%5B%5D=${collection.value}&pageSize=9`;
-    nfts = await fetch(fetchURL, requestOptions).then((data) => data.json());
+    nfts = await fetch(fetchURL, requestOptions)
+      .then((data) => data.json())
+      .catch(() => {
+        show.value = true;
+        message.value = "ENTER A VALID ADDRESS";
+      });
   }
-
-  console.log("nfts: ", nfts);
 
   if (nfts.ownedNfts.length !== 0 || nfts) {
     NFTs.value = nfts.ownedNfts;
+    show.value = false;
   } else {
     console.log("no NFTS");
+    show.value = true;
+    message.value = "NO NFT FOUND, TRY A NEW ADDRESS";
   }
 
   if (nfts.hasOwnProperty("pageKey")) {
-    // pageKey.value = nfts.pageKey;
-
     if (!pageKeys.value.includes(nfts.pageKey)) {
       pageKeys.value.push(nfts.pageKey);
       console.log("test: ", pageKeys);
     }
   } else {
-    // pageKey.value = null;
+    next.value = true;
   }
 }
 
@@ -100,13 +115,16 @@ function copyAddress(address) {
 }
 
 function onClickPage(pageIndex) {
-  if (wallet.value === "" && collection.value === "") return;
   currentPage.value = pageIndex;
   startSearching();
 }
 </script>
 
 <template>
+  <div v-if="show" class="alert alert-danger" role="alert">
+    {{ message }}
+  </div>
+
   <div class="container">
     <h2 class="text-center mt-3 mb-5">Search for NFT's</h2>
     <div class="input-group mb-3">
@@ -202,23 +220,23 @@ function onClickPage(pageIndex) {
     <section v-if="pageKeys.length > 0">
       <nav aria-label="navigation">
         <ul class="pagination justify-content-center">
-          <li
-            class="page-item"
-            @click="onClickPage(currentPage - 1)"
-            :class="{ disabled: currentPage === 0 }"
-          >
-            <a class="page-link" aria-label="Previous">
+          <li class="page-item" :class="{ disabled: currentPage === 0 }">
+            <i
+              @click="onClickPage(currentPage - 1)"
+              class="page-link"
+              aria-label="Previous"
+            >
               <span aria-hidden="true">&laquo;</span>
-            </a>
+            </i>
           </li>
-          <li
-            class="page-item"
-            @click="onClickPage(currentPage + 1)"
-            :class="{ disabled: pageKeys[currentPage - 1] }"
-          >
-            <a class="page-link" aria-label="Next">
+          <li class="page-item" :class="{ disabled: next }">
+            <i
+              @click="onClickPage(currentPage + 1)"
+              class="page-link"
+              aria-label="Next"
+            >
               <span aria-hidden="true">&raquo;</span>
-            </a>
+            </i>
           </li>
         </ul>
       </nav>
