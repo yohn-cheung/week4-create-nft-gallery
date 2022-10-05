@@ -1,14 +1,9 @@
-# week4-nft-gallery
+# Week 4 How to create a NFT gallery
 
-This template should help get you started developing with Vue 3 in Vite.
+How to create a NFT gallery is part of a 10-week, self-paced blockchain developer program to help me to build projects, provide by Alchemy.
 
-## Recommended IDE Setup
+In this tutorial, I learned how to use the Alchemy NFT API to build an NFT gallery capable of fetching NFTs.
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
 
 ## Project Setup
 
